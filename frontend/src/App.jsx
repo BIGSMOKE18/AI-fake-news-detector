@@ -1,213 +1,210 @@
 import { useState, useEffect } from "react";
 
+const API = "https://ai-fake-news-detector-x65i.onrender.com";
+
 function App() {
-  const [text, setText] = useState("");
-  const [result, setResult] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [metrics, setMetrics] = useState(null);
-  const [showMetrics, setShowMetrics] = useState(false);
-  const [history, setHistory] = useState([]);
 
-  // =============================
-  // Load Prediction History
-  // =============================
+const [text,setText] = useState("");
+const [result,setResult] = useState(null);
+const [loading,setLoading] = useState(false);
+const [metrics,setMetrics] = useState(null);
+const [showMetrics,setShowMetrics] = useState(false);
+const [history,setHistory] = useState([]);
 
-  const loadHistory = async () => {
-    try {
-      const response = await fetch("http://127.0.0.1:8000/history");
-      const data = await response.json();
-      setHistory(data);
-    } catch (error) {
-      console.log("Could not load history");
-    }
-  };
+const loadHistory = async ()=>{
+  try{
+    const res = await fetch(`${API}/history`);
+    const data = await res.json();
+    setHistory(data);
+  }catch(err){
+    console.log("history failed");
+  }
+};
 
-  useEffect(() => {
-    loadHistory();
-  }, []);
+useEffect(()=>{
+  loadHistory();
+},[]);
 
-  // =============================
-  // Predict News
-  // =============================
+const handleSubmit = async()=>{
 
-  const handleSubmit = async () => {
-    if (!text.trim()) return;
+if(!text.trim()) return;
 
-    setLoading(true);
-    setResult(null);
+setLoading(true);
+setResult(null);
 
-    try {
-      const response = await fetch("http://127.0.0.1:8000/predict", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ text })
-      });
+try{
 
-      const data = await response.json();
-      setResult(data);
+const res = await fetch(`${API}/predict`,{
+method:"POST",
+headers:{ "Content-Type":"application/json"},
+body:JSON.stringify({text})
+});
 
-      loadHistory(); // refresh history
+const data = await res.json();
+setResult(data);
+loadHistory();
 
-    } catch (error) {
-      alert("Backend not reachable");
-    }
+}catch(err){
+alert("Backend unreachable");
+}
 
-    setLoading(false);
-  };
+setLoading(false);
+};
 
-  // =============================
-  // Fetch Model Metrics
-  // =============================
+const fetchMetrics = async()=>{
 
-  const fetchMetrics = async () => {
-    try {
-      const response = await fetch("http://127.0.0.1:8000/metrics");
-      const data = await response.json();
-      setMetrics(data);
-      setShowMetrics(true);
-    } catch (error) {
-      alert("Could not load metrics");
-    }
-  };
+try{
 
-  // =============================
-  // Explainable Highlight
-  // =============================
+const res = await fetch(`${API}/metrics`);
+const data = await res.json();
 
-  const highlightText = () => {
-    if (!result) return text;
+setMetrics(data);
+setShowMetrics(true);
 
-    let highlighted = text;
+}catch(err){
+alert("Metrics unavailable");
+}
 
-    result.important_words.forEach((word) => {
-      const escapedWord = word.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-      const regex = new RegExp(`(${escapedWord})`, "gi");
+};
 
-      highlighted = highlighted.replace(
-        regex,
-        `<span class="highlight">$1</span>`
-      );
-    });
+return (
 
-    return highlighted;
-  };
+<div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black flex justify-center items-start p-10">
 
-  return (
-    <div className="app">
-      <div className="card">
+<div className="bg-white/10 backdrop-blur-xl shadow-2xl rounded-2xl w-[900px] p-10 text-white">
 
-        <h1 className="title">Explainable AI Fake News Detector</h1>
+<h1 className="text-3xl font-semibold text-center mb-6">
+🧠 Explainable AI Fake News Detector
+</h1>
 
-        <textarea
-          placeholder="Paste your news article here..."
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-        />
+<textarea
+className="w-full p-4 rounded-xl text-black h-40"
+placeholder="Paste news article..."
+value={text}
+onChange={(e)=>setText(e.target.value)}
+/>
 
-        <button onClick={handleSubmit} disabled={loading}>
-          {loading ? "Analyzing..." : "Analyze News"}
-        </button>
+<div className="flex gap-4 mt-4">
 
-        <button className="metrics-btn" onClick={fetchMetrics}>
-          View Model Performance
-        </button>
+<button
+onClick={handleSubmit}
+className="flex-1 bg-blue-600 hover:bg-blue-700 py-3 rounded-xl"
+>
+{loading ? "Analyzing..." : "Analyze News"}
+</button>
 
-        {/* =============================
-           Prediction Result
-        ============================== */}
+<button
+onClick={fetchMetrics}
+className="flex-1 bg-purple-600 hover:bg-purple-700 py-3 rounded-xl"
+>
+Model Metrics
+</button>
 
-        {result && (
-          <div className="result">
+</div>
 
-            <h2>
-              Prediction:{" "}
-              <span className={result.prediction === "Real News" ? "real" : "fake"}>
-                {result.prediction}
-              </span>
-            </h2>
+{result && (
 
-            <p className="confidence">
-              Confidence: {result.confidence}%
-            </p>
+<div className="mt-8 bg-white/10 p-6 rounded-xl">
 
-            <h3>Important Words</h3>
+<h2 className="text-xl mb-2">
 
-            <div className="words">
-              {result.important_words.map((word, index) => (
-                <span key={index} className="word">
-                  {word}
-                </span>
-              ))}
-            </div>
+Prediction :
 
-            <h3>Explainable AI Highlight</h3>
+<span className={`ml-2 font-bold ${result.prediction==="Real News"?"text-green-400":"text-red-400"}`}>
+{result.prediction}
+</span>
 
-            <div
-              className="highlighted-text"
-              dangerouslySetInnerHTML={{ __html: highlightText() }}
-            ></div>
+</h2>
 
-          </div>
-        )}
+<p className="text-gray-300">
+Confidence : {result.confidence}%
+</p>
 
-        {/* =============================
-           Model Metrics
-        ============================== */}
+<h3 className="mt-4 mb-2 font-semibold">
+Important Words
+</h3>
 
-        {showMetrics && metrics && (
-          <div className="metrics">
+<div className="flex flex-wrap gap-2">
 
-            <h2>Model Performance</h2>
+{result.important_words.map((w,i)=>(
+<span key={i} className="bg-yellow-400 text-black px-3 py-1 rounded-lg text-sm">
+{w}
+</span>
+))}
 
-            <div className="metric-box">
-              <p>Accuracy: {metrics.accuracy}</p>
-              <p>Precision: {metrics.precision}</p>
-              <p>Recall: {metrics.recall}</p>
-              <p>F1 Score: {metrics.f1_score}</p>
-            </div>
+</div>
 
-          </div>
-        )}
+</div>
 
-        {/* =============================
-           Prediction History
-        ============================== */}
+)}
 
-        <div className="history">
+{showMetrics && metrics && (
 
-          <h2>Recent Predictions</h2>
+<div className="mt-8 bg-white/10 p-6 rounded-xl">
 
-          <table>
+<h2 className="text-xl mb-3">Model Performance</h2>
 
-            <thead>
-              <tr>
-                <th>News Text</th>
-                <th>Prediction</th>
-                <th>Confidence</th>
-                <th>Time</th>
-              </tr>
-            </thead>
+<div className="grid grid-cols-2 gap-4">
 
-            <tbody>
-              {history.map((item, index) => (
-                <tr key={index}>
-                  <td>{item.text}</td>
-                  <td>{item.prediction}</td>
-                  <td>{item.confidence}%</td>
-                  <td>{item.timestamp}</td>
-                </tr>
-              ))}
-            </tbody>
+<p>Accuracy : {metrics.accuracy}</p>
+<p>Precision : {metrics.precision}</p>
+<p>Recall : {metrics.recall}</p>
+<p>F1 Score : {metrics.f1_score}</p>
 
-          </table>
+</div>
 
-        </div>
+</div>
 
-      </div>
-    </div>
-  );
+)}
+
+<div className="mt-10">
+
+<h2 className="text-xl mb-3">Recent Predictions</h2>
+
+<div className="max-h-60 overflow-auto">
+
+<table className="w-full text-sm">
+
+<thead>
+
+<tr className="text-left text-gray-300">
+<th>Text</th>
+<th>Prediction</th>
+<th>Conf</th>
+<th>Time</th>
+</tr>
+
+</thead>
+
+<tbody>
+
+{history.map((item,i)=>(
+
+<tr key={i} className="border-t border-gray-700">
+
+<td className="truncate max-w-[250px]">{item.text}</td>
+<td>{item.prediction}</td>
+<td>{item.confidence}%</td>
+<td>{item.timestamp}</td>
+
+</tr>
+
+))}
+
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+);
+
 }
 
 export default App;
