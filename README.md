@@ -117,7 +117,7 @@ Breaking: Scientists confirm aliens landed in New York.
 Output:
 
 Prediction: Fake News  
-Confidence Score: 92%
+Confidence Score: 87%
 
 ---
 
