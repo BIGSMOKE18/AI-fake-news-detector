@@ -100,8 +100,6 @@ npm run dev
 
 ## 📸 Application Interface
 
-Add a screenshot of your application interface in the screenshots folder.
-
 Example:
 
 ![App Interface](Screenshots/Screenshot1.png)
@@ -121,15 +119,6 @@ Prediction: Fake News
 Confidence Score: 87%
 
 ---
-
-## 🔮 Future Improvements
-
-- Use **BERT or Transformer models** for better accuracy
-- Improve dataset size
-- Add explainable AI predictions
-- Deploy full stack version online
-- Integrate fact-checking APIs
-
 ---
 
 ## 👨‍💻 Author
