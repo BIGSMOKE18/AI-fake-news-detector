@@ -105,7 +105,7 @@ Add a screenshot of your application interface in the screenshots folder.
 Example:
 
 ![App Interface](Screenshots/Screenshot1.png)
-![App Interface](Screenshots/Screenshot2.png)
+![App Interface](Screenshots/Screenshot3.png)
 
 ---
 
