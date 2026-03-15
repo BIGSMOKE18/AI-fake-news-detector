@@ -80,7 +80,7 @@ pip install -r requirements.txt
 
 ### 4. Run the backend server
 
-python api.py
+python main.py
 
 ### 5. Run the frontend
 
